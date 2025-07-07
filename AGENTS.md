@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Chatwoot Development Guidelines
 
 ## Build / Test / Lint
@@ -56,3 +60,52 @@
 ## Ruby Best Practices
 
 - Use compact `module/class` definitions; avoid nested styles
+
+## Architecture Overview
+
+### Tech Stack
+- **Backend**: Ruby on Rails 7.1+ with PostgreSQL, Redis, Sidekiq
+- **Frontend**: Vue 3 with Composition API, Vite, Tailwind CSS
+- **Process Management**: Overmind (development), Foreman (production)
+- **Node**: v23.x, **Package Manager**: pnpm 10.x
+
+### Key Directories
+- `/app/javascript/dashboard/` - Main dashboard Vue app
+- `/app/javascript/widget/` - Customer-facing chat widget
+- `/app/javascript/portal/` - Help center portal
+- `/app/javascript/shared/` - Shared components and utilities
+- `/app/javascript/components-next/` - New component system (preferred)
+- `/app/controllers/api/` - API controllers
+- `/app/services/` - Business logic services
+- `/app/jobs/` - Background jobs (Sidekiq)
+- `/enterprise/` - Enterprise features
+
+### Development Workflow
+- **Branch Model**: git-flow (base: `develop`, stable: `master`)
+- **Process Manager**: Use `overmind start -f ./Procfile.dev` for development
+- **Hot Reload**: Vite handles frontend hot reloading
+- **Background Jobs**: Sidekiq for async processing
+
+### Key Configuration Files
+- `Procfile.dev` - Development services (Rails server, Sidekiq worker, Vite)
+- `tailwind.config.js` - Tailwind configuration with custom colors and components
+- `vite.config.ts` - Vite build configuration
+- `config/features.yml` - Feature flags configuration
+
+### Component Architecture
+- **Vue 3 Composition API**: All new components use `<script setup>`
+- **Tailwind-Only Styling**: No custom CSS, scoped styles, or inline styles
+- **Component Library**: Migrating to `components-next/` directory
+- **State Management**: Vuex 4 (consider migrating to Pinia for new features)
+
+### Testing Strategy
+- **Frontend**: Vitest with Vue Test Utils
+- **Backend**: RSpec with FactoryBot
+- **Test Commands**: `pnpm test` (JS), `bundle exec rspec` (Ruby)
+- **Coverage**: Available via `pnpm test:coverage`
+
+### Integration Points
+- **ActionCable**: Real-time features via WebSocket
+- **Third-party APIs**: Facebook, Instagram, Twitter, WhatsApp, Slack
+- **AI/ML**: OpenAI integration for Captain (AI assistant)
+- **Notifications**: Push notifications via FCM and web-push
