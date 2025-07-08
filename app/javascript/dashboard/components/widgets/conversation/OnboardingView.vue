@@ -11,18 +11,18 @@ const currentUser = computed(() => getters.getCurrentUser.value);
 
 const greetingMessage = computed(() => {
   const hours = new Date().getHours();
-  let translationKey;
-  if (hours < 12) {
-    translationKey = 'ONBOARDING.GREETING_MORNING';
-  } else if (hours < 18) {
-    translationKey = 'ONBOARDING.GREETING_AFTERNOON';
-  } else {
-    translationKey = 'ONBOARDING.GREETING_EVENING';
-  }
-  return t(translationKey, {
+  const baseParams = {
     name: currentUser.value.name,
     installationName: globalConfig.value.installationName,
-  });
+  };
+
+  if (hours < 12) {
+    return t('ONBOARDING.GREETING_MORNING', baseParams);
+  }
+  if (hours < 18) {
+    return t('ONBOARDING.GREETING_AFTERNOON', baseParams);
+  }
+  return t('ONBOARDING.GREETING_EVENING', baseParams);
 });
 </script>
 
