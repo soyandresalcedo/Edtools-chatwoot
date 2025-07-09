@@ -1,28 +1,29 @@
-# Configuración del build (compilación) - No cambia
+# Configuración del build (compilación)
 [build]
 builder = "NIXPACKS"
 
-# Configuración del despliegue - MODIFICADA
+# Configuración del despliegue
 [deploy]
-# BORRAMOS el startCommand de aquí porque ahora es específico para cada servicio
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
-# --- NUEVA SECCIÓN ---
-# Definición explícita de los servicios
+# --- Sección de servicios ---
 
-# 1. Servicio WEB: Ejecuta la migración y luego inicia el servidor Puma
+# 1. Servicio WEB: Ejecuta la migración, la configuración de IP y luego inicia el servidor
 [[deploy.services]]
-name = "web" # Puedes cambiar "web" por el nombre de tu servicio principal si es diferente
+name = "web"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
-startCommand = "bundle exec rails db:migrate && bundle exec puma -C config/puma.rb"
+# ----- LÍNEA MODIFICADA -----
+startCommand = "bundle exec rails db:migrate && bundle exec rails ip_lookup:setup && bundle exec puma -C config/puma.rb"
 
-# 2. Servicio WORKER: Solo inicia Sidekiq (el procesador de tareas)
+# 2. Servicio WORKER: Solo inicia Sidekiq
 [[deploy.services]]
 name = "worker"
 startCommand = "bundle exec sidekiq -C config/sidekiq.yml"
 
+
+# Variables de Entorno - AÑADE TU CLAVE AQUÍ
 [env]
 RAILS_ENV = "production"
 RAILS_LOG_TO_STDOUT = "true"
