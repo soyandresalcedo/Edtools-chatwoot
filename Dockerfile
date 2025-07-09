@@ -14,12 +14,12 @@ RUN apt-get update && apt-get install -y \
     libxslt1-dev \
     libgdbm-dev \
     libncurses5-dev \
-    libgdbm-dev \
     libyaml-dev \
     pkg-config \
     wget \
     curl \
     git \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 23
@@ -42,7 +42,9 @@ RUN pnpm install --frozen-lockfile
 COPY Gemfile Gemfile.lock ./
 
 # Install Ruby dependencies
-RUN bundle install
+RUN bundle config set --local deployment 'true' && \
+    bundle config set --local without 'development test' && \
+    bundle install
 
 # Copy application code
 COPY . .
