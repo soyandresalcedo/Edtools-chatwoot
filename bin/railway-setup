@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Forzar entorno de producción
+export RAILS_ENV=production
+
 echo "🚀 Railway Setup Script para Chatwoot"
 
 # Generar claves secretas si no existen
@@ -16,12 +19,12 @@ fi
 
 # Ejecutar migraciones
 echo "📦 Ejecutando migraciones..."
-bundle exec rails db:migrate
+RAILS_ENV=production bundle exec rails db:migrate
 
 # Precompilar assets si no están compilados
 if [ ! -d "public/assets" ]; then
   echo "🎨 Precompilando assets..."
-  bundle exec rails assets:precompile
+  RAILS_ENV=production bundle exec rails assets:precompile
 fi
 
 echo "✨ Setup completado exitosamente!"
