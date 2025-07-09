@@ -1,4 +1,4 @@
-FROM ruby:3.2.0-bullseye
+FROM ruby:3.4.4-bullseye
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -20,7 +20,15 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     postgresql-client \
+    cmake \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libsqlite3-dev \
+    libmaxminddb-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install specific bundler version
+RUN gem install bundler:2.5.16
 
 # Install Node.js 23
 RUN curl -fsSL https://deb.nodesource.com/setup_23.x | bash - \
@@ -32,19 +40,27 @@ RUN npm install -g pnpm@10.2.0
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Configure build environment for gems
+ENV BUNDLE_BUILD__GRPC="--with-grpc-dir=/usr/local"
+ENV BUNDLE_BUILD__NOKOGIRI="--use-system-libraries"
+ENV BUNDLE_BUILD__PG="--with-pg-config=/usr/bin/pg_config"
+ENV BUNDLE_BUILD__SASSC="--disable-march-tune-native"
 
-# Install Node dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy Ruby dependencies
+# Copy Ruby dependencies first (for better caching)
 COPY Gemfile Gemfile.lock ./
 
 # Install Ruby dependencies
 RUN bundle config set --local deployment 'true' && \
     bundle config set --local without 'development test' && \
-    bundle install
+    bundle config set --local jobs 4 && \
+    bundle config set --local retry 3 && \
+    bundle install --verbose
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install Node dependencies
+RUN pnpm install --frozen-lockfile
 
 # Copy application code
 COPY . .

@@ -1,13 +1,22 @@
 [variables]
 NIXPACKS_METADATA = "ruby,nodejs"
+BUNDLE_BUILD__GRPC = "--with-grpc-dir=/usr/local"
+BUNDLE_BUILD__NOKOGIRI = "--use-system-libraries"
+BUNDLE_BUILD__PG = "--with-pg-config=/usr/bin/pg_config"
+BUNDLE_BUILD__SASSC = "--disable-march-tune-native"
 
 [phases.setup]
 nixPkgs = ["ruby_3_4", "nodejs_24", "postgresql", "python3"]
-nixLibs = ["libvips"]
+nixLibs = ["libvips", "protobuf", "cmake", "libmaxminddb"]
 
 [phases.install]
 cmds = [
-  "bundle install --without development test",
+  "gem install bundler:2.5.16",
+  "bundle config set --local deployment 'true'",
+  "bundle config set --local without 'development test'",
+  "bundle config set --local jobs 4",
+  "bundle config set --local retry 3",
+  "bundle install --verbose",
   "corepack enable",
   "pnpm install --frozen-lockfile"
 ]
