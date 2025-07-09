@@ -1,7 +1,8 @@
 class CreateCaptainTables < ActiveRecord::Migration[7.0]
   def up
-    # Post this migration, the 'vector' extension is mandatory to run the application.
-    # If the extension is not installed, the migration will raise an error.
+    # The 'vector' extension is preferred for optimal performance but not mandatory.
+    # If the extension is not available (e.g., Railway, some hosting providers),
+    # the migration will gracefully fallback to text columns for embeddings.
     setup_vector_extension
     create_assistants
     create_documents
@@ -26,9 +27,35 @@ class CreateCaptainTables < ActiveRecord::Migration[7.0]
 
     begin
       enable_extension 'vector'
-    rescue ActiveRecord::StatementInvalid
-      raise StandardError, "Failed to enable 'vector' extension. Read more at https://chwt.app/v4/migration"
+    rescue ActiveRecord::StatementInvalid => e
+      # Handle Railway and other hosting providers that don't support pgvector
+      Rails.logger.warn 'pgvector extension not available in current environment. Skipping vector features.'
+      Rails.logger.warn "Error: #{e.message}"
+      # Add the extension to ignore list for schema dumping
+      add_extension_to_ignore_list('vector')
+      return
     end
+  end
+
+  def railway_environment?
+    # Check for Railway-specific environment variables
+    ENV['RAILWAY_PROJECT_ID'].present? || ENV['RAILWAY_PROJECT_NAME'].present? ||
+      ENV['RAILWAY_ENVIRONMENT'].present? || ENV['DATABASE_URL']&.include?('railway')
+  end
+
+  def extension_not_available?(error)
+    # Check if the error indicates the extension is not available
+    error.message.include?('does not exist') ||
+      error.message.include?('extension "vector" is not available') ||
+      error.message.include?('could not open extension control file')
+  end
+
+  def add_extension_to_ignore_list(extension_name)
+    # Add to the ignore list for schema dumping
+    return unless defined?(ActiveRecord::ConnectionAdapters::PostgreSQL::SchemaDumper)
+
+    ActiveRecord::ConnectionAdapters::PostgreSQL::SchemaDumper.ignore_extentions ||= []
+    ActiveRecord::ConnectionAdapters::PostgreSQL::SchemaDumper.ignore_extentions << extension_name
   end
 
   def create_assistants
@@ -64,7 +91,15 @@ class CreateCaptainTables < ActiveRecord::Migration[7.0]
     create_table :captain_assistant_responses do |t|
       t.string :question, null: false
       t.text :answer, null: false
-      t.vector :embedding, limit: 1536
+
+      # Only add vector column if extension is available
+      if extension_enabled?('vector')
+        t.vector :embedding, limit: 1536
+      else
+        # Use text column as fallback for environments without pgvector
+        t.text :embedding_data
+      end
+
       t.bigint :assistant_id, null: false
       t.bigint :document_id
       t.bigint :account_id, null: false
@@ -75,6 +110,10 @@ class CreateCaptainTables < ActiveRecord::Migration[7.0]
     add_index :captain_assistant_responses, :account_id
     add_index :captain_assistant_responses, :assistant_id
     add_index :captain_assistant_responses, :document_id
+
+    # Only add vector index if extension is available
+    return unless extension_enabled?('vector')
+
     add_index :captain_assistant_responses, :embedding, using: :ivfflat, name: 'vector_idx_knowledge_entries_embedding', opclass: :vector_l2_ops
   end
 
@@ -82,9 +121,21 @@ class CreateCaptainTables < ActiveRecord::Migration[7.0]
     create_table :article_embeddings, if_not_exists: true do |t|
       t.bigint :article_id, null: false
       t.text :term, null: false
-      t.vector :embedding, limit: 1536
+
+      # Only add vector column if extension is available
+      if extension_enabled?('vector')
+        t.vector :embedding, limit: 1536
+      else
+        # Use text column as fallback for environments without pgvector
+        t.text :embedding_data
+      end
+
       t.timestamps
     end
+
+    # Only add vector index if extension is available
+    return unless extension_enabled?('vector')
+
     add_index :article_embeddings, :embedding, if_not_exists: true, using: :ivfflat, opclass: :vector_l2_ops
   end
 end
