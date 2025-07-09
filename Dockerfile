@@ -66,7 +66,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Precompile assets
-RUN RAILS_ENV=production bundle exec rails assets:precompile
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
 
 # Expose port
 EXPOSE 3000
