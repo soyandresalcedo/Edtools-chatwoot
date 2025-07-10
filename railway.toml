@@ -14,8 +14,8 @@ restartPolicyMaxRetries = 10
 [[deploy.services]]
 name = "web"
 healthcheckPath = "/health"
-healthcheckTimeout = 120
-healthcheckInterval = 15
+healthcheckTimeout = 300
+healthcheckInterval = 30
 startCommand = "./bin/entrypoint-web.sh"
 
 # 2. Servicio WORKER: Ejecuta script que construye URLs e inicia Sidekiq
