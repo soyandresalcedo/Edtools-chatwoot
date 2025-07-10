@@ -16,7 +16,7 @@ name = "web"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 healthcheckInterval = 30
-startCommand = "./bin/entrypoint-web.sh"
+startCommand = "sh ./bin/entrypoint-web.sh"
 
 # 2. Servicio WORKER: Ejecuta script que construye URLs e inicia Sidekiq
 [[deploy.services]]
