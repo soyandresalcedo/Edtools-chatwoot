@@ -46,23 +46,18 @@ ENV BUNDLE_BUILD__NOKOGIRI="--use-system-libraries"
 ENV BUNDLE_BUILD__PG="--with-pg-config=/usr/bin/pg_config"
 ENV BUNDLE_BUILD__SASSC="--disable-march-tune-native"
 
-# Copy Ruby dependencies first (for better caching)
-COPY Gemfile Gemfile.lock ./
+# Copy application code (needed for git gems)
+COPY . .
 
 # Install Ruby dependencies
-RUN bundle config set --local without 'development test' && \
+RUN bundle config set --local deployment 'true' && \
+    bundle config set --local without 'development test' && \
     bundle config set --local jobs 4 && \
     bundle config set --local retry 3 && \
     bundle install --verbose
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
-
 # Install Node dependencies
 RUN pnpm install --frozen-lockfile
-
-# Copy application code
-COPY . .
 
 # Precompile assets
 RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
