@@ -1,28 +1,29 @@
 # Configuración del build (compilación)
 [build]
-builder = "NIXPACKS"
+builder = "DOCKERFILE"
 
-# Configuración del despliegue
+# Configuración del despliegue GENERAL
 [deploy]
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+# --- ¡LA MAGIA ESTÁ AQUÍ! ---
+releaseCommand = "bundle exec rails db:migrate && bundle exec rails ip_lookup:setup"
 
-# --- Sección de servicios ---
+# --- Definición explícita de los servicios ---
 
-# 1. Servicio WEB: Ejecuta la migración, la configuración de IP y luego inicia el servidor
+# 1. Servicio WEB: Su ÚNICA misión es correr el servidor.
 [[deploy.services]]
 name = "web"
 healthcheckPath = "/health"
 healthcheckTimeout = 120
 healthcheckInterval = 15
-# ----- LÍNEA MODIFICADA -----
-startCommand = "./bin/entrypoint.sh"
+# El comando de arranque ahora es simple y directo
+startCommand = "bundle exec puma -C config/puma.rb -b 0.0.0.0 -p ${PORT}"
 
-# 2. Servicio WORKER: Solo inicia Sidekiq
+# 2. Servicio WORKER: Su ÚNICA misión es correr Sidekiq.
 [[deploy.services]]
 name = "worker"
 startCommand = "bundle exec sidekiq -C config/sidekiq.yml"
-
 
 # Variables de Entorno - AÑADE TU CLAVE AQUÍ
 [env]

@@ -72,4 +72,4 @@ RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rails assets:precompi
 EXPOSE 3000
 
 # Start command
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb", "-b", "0.0.0.0", "-p", "3000"]
