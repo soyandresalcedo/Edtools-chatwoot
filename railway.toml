@@ -8,23 +8,20 @@ builder = "DOCKERFILE"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 # --- ¡LA MAGIA ESTÁ AQUÍ! ---
-releaseCommand = "bundle exec rails db:migrate && bundle exec rails ip_lookup:setup"
-
 # --- Definición explícita de los servicios ---
 
-# 1. Servicio WEB: Su ÚNICA misión es correr el servidor.
+# 1. Servicio WEB: Ejecuta script que construye URLs y inicia servidor
 [[deploy.services]]
 name = "web"
 healthcheckPath = "/health"
 healthcheckTimeout = 120
 healthcheckInterval = 15
-# El comando de arranque ahora es simple y directo
-startCommand = "bundle exec puma -C config/puma.rb -b 0.0.0.0 -p ${PORT}"
+startCommand = "./bin/entrypoint-web.sh"
 
-# 2. Servicio WORKER: Su ÚNICA misión es correr Sidekiq.
+# 2. Servicio WORKER: Ejecuta script que construye URLs e inicia Sidekiq
 [[deploy.services]]
 name = "worker"
-startCommand = "bundle exec sidekiq -C config/sidekiq.yml"
+startCommand = "./bin/entrypoint-worker.sh"
 
 # Variables de Entorno - AÑADE TU CLAVE AQUÍ
 [env]
