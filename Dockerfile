@@ -50,8 +50,7 @@ ENV BUNDLE_BUILD__SASSC="--disable-march-tune-native"
 COPY Gemfile Gemfile.lock ./
 
 # Install Ruby dependencies
-RUN bundle config set --local deployment 'true' && \
-    bundle config set --local without 'development test' && \
+RUN bundle config set --local without 'development test' && \
     bundle config set --local jobs 4 && \
     bundle config set --local retry 3 && \
     bundle install --verbose
