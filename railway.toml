@@ -13,9 +13,10 @@ restartPolicyMaxRetries = 10
 [[deploy.services]]
 name = "web"
 healthcheckPath = "/health"
-healthcheckTimeout = 100
+healthcheckTimeout = 120
+healthcheckInterval = 15
 # ----- LÍNEA MODIFICADA -----
-startCommand = "bundle exec rails db:migrate && bundle exec rails ip_lookup:setup && bundle exec puma -C config/puma.rb"
+startCommand = "bundle exec rails db:migrate && bundle exec rails ip_lookup:setup && bundle exec puma -C config/puma.rb -b 0.0.0.0 -p ${PORT}"
 
 # 2. Servicio WORKER: Solo inicia Sidekiq
 [[deploy.services]]
