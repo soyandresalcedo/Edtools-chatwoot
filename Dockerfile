@@ -58,11 +58,12 @@ WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
 
-# natively compile grpc and protobuf to support alpine musl (dialogflow-docker workflow)
-# https://github.com/googleapis/google-cloud-ruby/issues/13306
-# adding xz as nokogiri was failing to build libxml
-# https://github.com/chatwoot/chatwoot/issues/4045
-RUN apk update && apk add --no-cache build-base musl ruby-full ruby-dev gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips
+# Install git for git-based gems
+RUN apk update && apk add --no-cache build-base musl ruby-full ruby-dev gcc make musl-dev openssl openssl-dev g++ linux-headers xz vips git
+
+# Copy source code BEFORE bundle install to access git gems
+COPY . .
+
 RUN bundle config set --local force_ruby_platform true
 
 # Do not install development or test gems in production
@@ -73,8 +74,6 @@ RUN if [ "$RAILS_ENV" = "production" ]; then \
 
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm i
-
-COPY . /app
 
 # creating a log directory so that image wont fail when RAILS_LOG_TO_STDOUT is false
 # https://github.com/chatwoot/chatwoot/issues/701
