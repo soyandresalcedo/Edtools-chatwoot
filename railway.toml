@@ -16,7 +16,7 @@ healthcheckPath = "/health"
 healthcheckTimeout = 120
 healthcheckInterval = 15
 # ----- LÍNEA MODIFICADA -----
-startCommand = "bundle exec rails db:migrate && bundle exec rails ip_lookup:setup && bundle exec puma -C config/puma.rb -b 0.0.0.0 -p ${PORT}"
+startCommand = "./bin/entrypoint.sh"
 
 # 2. Servicio WORKER: Solo inicia Sidekiq
 [[deploy.services]]
