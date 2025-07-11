@@ -26,5 +26,24 @@ bundle exec rails db:migrate
 echo "=== Configurando GeoIP ==="
 bundle exec rails ip_lookup:setup || echo "GeoIP setup failed, continuing..."
 
+# Create admin account if not exists
+echo "=== Creando cuenta admin ==="
+bundle exec rails runner "
+if User.where(email: 'admin@chatwoot.com').empty?
+  account = Account.create!(name: 'Admin Account')
+  user = User.create!(
+    email: 'admin@chatwoot.com',
+    password: 'password123',
+    password_confirmation: 'password123',
+    name: 'Admin User',
+    confirmed_at: Time.current
+  )
+  AccountUser.create!(account: account, user: user, role: 'administrator')
+  puts 'Admin account created: admin@chatwoot.com / password123'
+else
+  puts 'Admin account already exists'
+end
+"
+
 echo "=== Iniciando servidor Puma ==="
 exec bundle exec puma -C config/puma.rb
