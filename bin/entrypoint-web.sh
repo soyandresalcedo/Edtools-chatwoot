@@ -14,6 +14,10 @@ if [ -z "$DEVISE_JWT_SECRET_KEY" ]; then
   export DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 64)
 fi
 
+# Create required directories
+echo "=== Creando directorios necesarios ==="
+mkdir -p tmp/pids
+
 # Now Rails commands can run safely
 echo "=== Ejecutando migraciones ==="
 bundle exec rails db:migrate
