@@ -23,4 +23,4 @@ echo "=== Configurando GeoIP ==="
 bundle exec rails ip_lookup:setup || echo "GeoIP setup failed, continuing..."
 
 echo "=== Iniciando servidor Puma ==="
-exec bundle exec puma -C config/puma.rb -b 0.0.0.0 -p "${PORT:-3000}"
+exec bundle exec puma -C config/puma.rb
