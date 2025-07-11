@@ -33,13 +33,13 @@ if User.where(email: 'andres@edtools.co').empty?
   account = Account.create!(name: 'Edtools Account')
   user = User.create!(
     email: 'andres@edtools.co',
-    password: 'password123',
-    password_confirmation: 'password123',
+    password: 'Password123!',
+    password_confirmation: 'Password123!',
     name: 'Andres Alcedo',
     confirmed_at: Time.current
   )
   AccountUser.create!(account: account, user: user, role: 'administrator')
-  puts 'Admin account created: andres@edtools.co / password123'
+  puts 'Admin account created: andres@edtools.co / Password123!'
 else
   puts 'Admin account already exists'
 end
