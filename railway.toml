@@ -46,6 +46,3 @@ PORT = "3000"
 
 # pgvector fallback mode for Railway
 RAILWAY_PGVECTOR_FALLBACK = "true"
-
-# Rails master key for credentials decryption
-RAILS_MASTER_KEY = "${{RAILS_MASTER_KEY}}"
