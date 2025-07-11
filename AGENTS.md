@@ -109,3 +109,122 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Third-party APIs**: Facebook, Instagram, Twitter, WhatsApp, Slack
 - **AI/ML**: OpenAI integration for Captain (AI assistant)
 - **Notifications**: Push notifications via FCM and web-push
+
+## Railway Deployment - SPECIFIC CONFIGURATION
+
+### 🚀 Railway Deployment Setup
+
+This project has been optimized for Railway deployment with the following configuration:
+
+#### **Files Modified for Railway:**
+- `railway.toml` - Optimized configuration using nixpacks
+- `Procfile` - Simplified for Railway compatibility
+- `nixpacks.toml` - Build configuration without runtime migrations
+- `bin/entrypoint-web.sh` - Railway-specific entrypoint script
+- `RAILWAY_DEPLOY_GUIDE.md` - Complete deployment guide
+
+#### **Critical Environment Variables for Railway:**
+```bash
+# Generated automatically by Railway
+DATABASE_URL=postgresql://... (PostgreSQL service)
+REDIS_URL=redis://... (Redis service)
+PORT=3000 (automatic)
+
+# MUST be configured manually
+SECRET_KEY_BASE=generate-with-rails-secret-64-chars
+DEVISE_JWT_SECRET_KEY=generate-with-rails-secret-64-chars
+FRONTEND_URL=https://your-app.railway.app
+HELPCENTER_URL=https://your-app.railway.app
+
+# Optional but recommended
+MAILER_SENDER_EMAIL=noreply@yourdomain.com
+ENABLE_ACCOUNT_SIGNUP=true
+FORCE_SSL=true
+ACTIVE_STORAGE_SERVICE=local
+```
+
+#### **Railway-Specific Issues Resolved:**
+
+1. **Error 502 Fix**: Simplified Procfile and proper port configuration
+2. **pgvector Compatibility**: Fallback mode for Railway's standard PostgreSQL
+3. **Build Optimization**: Separated build-time and runtime operations
+4. **Secret Generation**: Automatic secret generation in entrypoint script
+5. **Database Migrations**: Handled in runtime, not build-time
+
+#### **Deployment Commands:**
+```bash
+# Generate secret keys locally
+rails secret  # Use for SECRET_KEY_BASE
+rails secret  # Use for DEVISE_JWT_SECRET_KEY
+
+# Deploy to Railway
+git add .
+git commit -m "Deploy to Railway"
+git push origin main
+```
+
+#### **Common Railway Deployment Issues:**
+
+**Error 502 (Bad Gateway):**
+- Verify SECRET_KEY_BASE and DEVISE_JWT_SECRET_KEY are set
+- Check that FRONTEND_URL matches your Railway domain
+- Ensure PostgreSQL and Redis services are connected
+
+**Database Migration Failures:**
+- pgvector extension handling is automatic (fallback mode)
+- Migrations run in entrypoint script, not build phase
+- Check Railway logs for specific migration errors
+
+**Asset Compilation Issues:**
+- Assets are precompiled during nixpacks build phase
+- Ensure pnpm dependencies are installed correctly
+- Check for JavaScript/CSS compilation errors in logs
+
+#### **pgvector Configuration:**
+This project includes automatic pgvector fallback for Railway:
+- **With pgvector**: Full AI features with optimized vector search
+- **Without pgvector**: Basic AI features with text-based fallback
+- **Migration**: `20250104200055_create_captain_tables.rb` handles both scenarios
+
+#### **Performance Optimizations for Railway:**
+- **Nixpacks**: Optimized build configuration
+- **Process Management**: Simplified Procfile for stability
+- **Asset Pipeline**: Vite-based build with efficient caching
+- **Database**: Optimized connection pooling and query timeouts
+
+#### **Monitoring and Debugging:**
+```bash
+# View Railway logs
+railway logs
+
+# Connect to database
+railway connect
+
+# Run migrations manually
+railway run bundle exec rails db:migrate
+
+# Check environment variables
+railway variables
+```
+
+### 📋 Railway Deployment Checklist
+
+Before deploying to Railway:
+1. ✅ PostgreSQL service connected
+2. ✅ Redis service connected
+3. ✅ SECRET_KEY_BASE configured
+4. ✅ DEVISE_JWT_SECRET_KEY configured
+5. ✅ FRONTEND_URL set to Railway domain
+6. ✅ HELPCENTER_URL set to Railway domain
+7. ✅ All code changes committed and pushed
+
+### 🔧 Railway-Specific Development
+
+When working on Railway deployment issues:
+- Check `railway.toml` for service configuration
+- Review `nixpacks.toml` for build settings
+- Examine `bin/entrypoint-web.sh` for startup sequence
+- Consult `RAILWAY_DEPLOY_GUIDE.md` for detailed instructions
+- Monitor Railway dashboard for service health and logs
+
+This configuration ensures reliable deployment on Railway while maintaining compatibility with other deployment methods.
