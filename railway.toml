@@ -17,6 +17,12 @@ RAILS_LOG_TO_STDOUT = "true"
 RAILS_SERVE_STATIC_FILES = "true"
 RAILS_MAX_THREADS = "5"
 
+# --- Node---
+NODE_ENV = "production"
+
+# --- Docker ---
+INSTALLATION_ENV = "docker"
+
 # --- HEALTH---
 healthcheckTimeout = 300
 deployTimeout = 600
@@ -40,3 +46,6 @@ PORT = "3000"
 
 # pgvector fallback mode for Railway
 RAILWAY_PGVECTOR_FALLBACK = "true"
+
+# Rails master key for credentials decryption
+RAILS_MASTER_KEY = "${{RAILS_MASTER_KEY}}"

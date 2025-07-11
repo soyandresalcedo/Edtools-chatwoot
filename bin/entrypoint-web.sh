@@ -22,5 +22,5 @@ bundle exec rails db:migrate
 echo "=== Configurando GeoIP ==="
 bundle exec rails ip_lookup:setup || echo "GeoIP setup failed, continuing..."
 
-echo "=== Iniciando servidor Rails ==="
-exec bundle exec rails server -p "${PORT}" -e "${RAILS_ENV}"
+echo "=== Iniciando servidor Puma ==="
+exec bundle exec puma -C config/puma.rb -b 0.0.0.0 -p "${PORT:-3000}"
