@@ -29,17 +29,17 @@ bundle exec rails ip_lookup:setup || echo "GeoIP setup failed, continuing..."
 # Create admin account if not exists
 echo "=== Creando cuenta admin ==="
 bundle exec rails runner "
-if User.where(email: 'admin@chatwoot.com').empty?
-  account = Account.create!(name: 'Admin Account')
+if User.where(email: 'andres@edtools.co').empty?
+  account = Account.create!(name: 'Edtools Account')
   user = User.create!(
-    email: 'admin@chatwoot.com',
+    email: 'andres@edtools.co',
     password: 'password123',
     password_confirmation: 'password123',
-    name: 'Admin User',
+    name: 'Andres Alcedo',
     confirmed_at: Time.current
   )
   AccountUser.create!(account: account, user: user, role: 'administrator')
-  puts 'Admin account created: admin@chatwoot.com / password123'
+  puts 'Admin account created: andres@edtools.co / password123'
 else
   puts 'Admin account already exists'
 end
