@@ -27,6 +27,13 @@ echo "=== Configurando GeoIP ==="
 bundle exec rails ip_lookup:setup || echo "GeoIP setup failed, continuing..."
 
 # Create admin account if not exists
+# Set installation name
+echo "=== Configurando nombre de instalación ==="
+bundle exec rails runner "
+InstallationConfig.where(name: 'INSTALLATION_NAME').first_or_create.update!(value: 'Edtools')
+puts 'Installation name set to: Edtools'
+"
+
 echo "=== Creando cuenta admin ==="
 bundle exec rails runner "
 if User.where(email: 'andres@edtools.co').empty?
