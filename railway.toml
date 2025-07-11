@@ -1,38 +1,38 @@
-# Final check
-# Configuración del build (compilación)
-[build]
-builder = "DOCKERFILE"
+# Railway.toml - Configuración optimizada para Chatwoot
+# Basado en documentación oficial y mejores prácticas
 
-# Configuración del despliegue GENERAL
+[build]
+builder = "nixpacks"
+
 [deploy]
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-# --- ¡LA MAGIA ESTÁ AQUÍ! ---
-# --- Definición explícita de los servicios ---
+restartPolicyMaxRetries = 3
 
-# 1. Servicio WEB: Ejecuta script que construye URLs y inicia servidor
-[[deploy.services]]
-name = "web"
-healthcheckPath = "/health"
-healthcheckTimeout = 300
-healthcheckInterval = 30
-startCommand = "sh ./bin/entrypoint-web.sh"
-
-# 2. Servicio WORKER: Ejecuta script que construye URLs e inicia Sidekiq
-[[deploy.services]]
-name = "worker"
-startCommand = "./bin/entrypoint-worker.sh"
-
-# Variables de Entorno - AÑADE TU CLAVE AQUÍ
+# Variables de entorno esenciales
 [env]
+# Rails configuration
 RAILS_ENV = "production"
 RACK_ENV = "production"
 RAILS_LOG_TO_STDOUT = "true"
 RAILS_SERVE_STATIC_FILES = "true"
 RAILS_MAX_THREADS = "5"
+
+# Bundle configuration
 BUNDLE_WITHOUT = "development:test"
 BUNDLE_DEPLOYMENT = "true"
+
+# Security and SSL
 FORCE_SSL = "true"
 ENABLE_ACCOUNT_SIGNUP = "true"
+
+# Storage configuration
 ACTIVE_STORAGE_SERVICE = "local"
+
+# Email configuration
 MAILER_SENDER_EMAIL = "noreply@tudominio.com"
+
+# Port configuration for Railway
+PORT = "3000"
+
+# pgvector fallback mode for Railway
+RAILWAY_PGVECTOR_FALLBACK = "true"

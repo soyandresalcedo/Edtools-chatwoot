@@ -23,9 +23,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "bundle exec rails assets:precompile",
-  "bundle exec rails db:migrate"
+  "bundle exec rails assets:precompile"
 ]
 
 [start]
-cmd = "bin/rails server -p $PORT -e $RAILS_ENV"
+cmd = "bundle exec rails server -p $PORT -e $RAILS_ENV"

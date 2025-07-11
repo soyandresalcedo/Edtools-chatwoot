@@ -1,25 +1,26 @@
 #!/bin/sh
 set -e
 
-# Debug variables
-echo "PGUSER: $PGUSER"
-echo "PGHOST: $PGHOST"
-echo "PGPORT: $PGPORT"
-echo "PGDATABASE: $PGDATABASE"
+echo "=== Chatwoot Railway Entrypoint ==="
 
-# Construir DATABASE_URL manualmente desde variables individuales
-export DATABASE_URL="postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}"
-
-# Construir REDIS_URL manualmente desde variables individuales  
-export REDIS_URL="redis://:${REDISPASSWORD}@${REDISHOST}:${REDISPORT}"
-
-echo "DATABASE_URL construida: $DATABASE_URL"
-
+# Setup database (Railway provides DATABASE_URL automatically)
 echo "=== Ejecutando migraciones ==="
 bundle exec rails db:migrate
 
+# Setup IP lookup (optional, can fail gracefully)
 echo "=== Configurando GeoIP ==="
-bundle exec rails ip_lookup:setup
+bundle exec rails ip_lookup:setup || echo "GeoIP setup failed, continuing..."
 
-echo "=== Iniciando servidor Puma ==="
-exec bundle exec puma -C config/puma.rb -b 0.0.0.0 -p "${PORT}"
+# Generate secrets if needed
+if [ -z "$SECRET_KEY_BASE" ]; then
+  echo "=== Generando SECRET_KEY_BASE ==="
+  export SECRET_KEY_BASE=$(openssl rand -hex 64)
+fi
+
+if [ -z "$DEVISE_JWT_SECRET_KEY" ]; then
+  echo "=== Generando DEVISE_JWT_SECRET_KEY ==="
+  export DEVISE_JWT_SECRET_KEY=$(openssl rand -hex 64)
+fi
+
+echo "=== Iniciando servidor Rails ==="
+exec bundle exec rails server -p "${PORT}" -e "${RAILS_ENV}"
