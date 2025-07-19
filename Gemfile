@@ -243,3 +243,5 @@ group :development, :test do
   gem 'spring'
   gem 'spring-watcher-listen'
 end
+
+gem "logtail-rails", "~> 0.2.10"
