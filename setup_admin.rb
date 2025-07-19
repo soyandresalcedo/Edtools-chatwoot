@@ -11,7 +11,8 @@ user = User.create!(
   password: 'AmomuchoaEdtools_2025',
   password_confirmation: 'AmomuchoaEdtools_2025',
   name: 'Administrador',
-  confirmed_at: Time.current
+  confirmed_at: Time.current,
+  super_admin: true
 )
 puts "✅ Usuario creado: #{user.email}"
 
