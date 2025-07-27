@@ -18,7 +18,9 @@ export default {
   computed: {
     ...mapGetters({ globalConfig: 'globalConfig/get' }),
     isAChatwootInstance() {
-      return this.globalConfig.installationName === 'Chatwoot';
+      return ['Chatwoot', 'Edtools'].includes(
+        this.globalConfig.installationName
+      );
     },
   },
   beforeMount() {

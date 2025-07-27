@@ -33,9 +33,6 @@ if ENV.fetch('JUDOSCALE_URL', false).present?
   require 'judoscale-sidekiq'
 end
 
-# Better Stack Logging
-require 'logtail-rails' if ENV.fetch('BETTERSTACK_SOURCE_TOKEN', false).present?
-
 module Chatwoot
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -56,16 +53,6 @@ module Chatwoot
     # the framework and any gems in your application.
     config.generators.javascripts = false
     config.generators.stylesheets = false
-
-    # --- CONFIGURACIÓN DE BETTER STACK ---
-    # Solo configura el logger si la variable de entorno está presente.
-    if ENV['BETTERSTACK_SOURCE_TOKEN'].present?
-      config.logger = Logtail::Logger.create_default_logger(
-        ENV.fetch('BETTERSTACK_SOURCE_TOKEN'),
-        ingesting_host: 's1444261.eu-nbg-2.betterstackdata.com'
-      )
-    end
-    # --- FIN CONFIGURACIÓN DE BETTER STACK ---
 
     # Custom chatwoot configurations
     config.x = config_for(:app).with_indifferent_access
