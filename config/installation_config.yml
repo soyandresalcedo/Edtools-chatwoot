@@ -59,7 +59,7 @@
 # ------- Signup & Account Related Config ------- #
 - name: ENABLE_ACCOUNT_SIGNUP
   display_title: 'Enable Account Signup'
-  value: false
+  value: true
   description: 'Allow users to signup for new accounts'
   locked: false
   type: boolean
@@ -80,7 +80,7 @@
   locked: false
 - name: DIRECT_UPLOADS_ENABLED
   type: boolean
-  value: false
+  value: true
   description: 'Enable direct uploads to cloud storage'
   locked: false
 # ------- End of Account Related Config ------- #
@@ -88,12 +88,12 @@
 # ------- Email Related Config ------- #
 - name: MAILER_INBOUND_EMAIL_DOMAIN
   display_title: 'Inbound Email Domain'
-  value:
+  value: 'edtools.co'
   description: 'The domain name to be used for generating conversation continuity emails (reply+id@domain.com)'
   locked: false
 - name: MAILER_SUPPORT_EMAIL
   display_title: 'Support Email'
-  value:
+  value: 'support@edtools.co'
   description: 'The support email address for your installation'
   locked: false
 # ------- End of Email Related Config ------- #
@@ -236,7 +236,7 @@
 
 # ------- Chatwoot Internal Config for Self Hosted ----#
 - name: INSTALLATION_PRICING_PLAN
-  value: 'community'
+  value: 'enterprise'
   description: 'The pricing plan for the installation, retrieved from the billing API'
 - name: INSTALLATION_PRICING_PLAN_QUANTITY
   value: 0
