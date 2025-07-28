@@ -36,7 +36,14 @@ FORCE_SSL = "true"
 ENABLE_ACCOUNT_SIGNUP = "true"
 
 # Storage configuration
-ACTIVE_STORAGE_SERVICE = "local"
+ACTIVE_STORAGE_SERVICE = "amazon"
+
+# AWS S3 Configuration
+# IMPORTANTE: Configura estas variables en Railway Dashboard > Variables:
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY  
+# AWS_REGION
+# S3_BUCKET_NAME
 
 # Email configuration
 MAILER_SENDER_EMAIL = "noreply@tudominio.com"
