@@ -39,7 +39,7 @@ module ConversationReplyMailerHelper
     current_total_size = 0
 
     @message.attachments.each do |attachment|
-      raw_data = attachment.file.download
+      raw_data = attachment.file.blob.service.download(attachment.file.blob.key)
       attachment_name = attachment.file.filename.to_s
       file_size = raw_data.bytesize
 
