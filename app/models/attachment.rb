@@ -50,17 +50,19 @@ class Attachment < ApplicationRecord
 
   # NOTE: the URl returned does a 301 redirect to the actual file
   def file_url
+    ensure_active_storage_url_options
     file.attached? ? url_for(file) : ''
   end
 
   # NOTE: for External services use this methods since redirect doesn't work effectively in a lot of cases
   def download_url
-    ActiveStorage::Current.url_options = Rails.application.routes.default_url_options if ActiveStorage::Current.url_options.blank?
+    ensure_active_storage_url_options
     file.attached? ? file.blob.url : ''
   end
 
   def thumb_url
     if file.attached? && file.representable?
+      ensure_active_storage_url_options
       url_for(file.representation(resize_to_fill: [250, nil]))
     else
       ''
@@ -168,6 +170,12 @@ class Attachment < ApplicationRecord
 
   def media_file?(file_content_type)
     file_content_type.start_with?('image/', 'video/', 'audio/')
+  end
+
+  def ensure_active_storage_url_options
+    return if ActiveStorage::Current.url_options.present?
+
+    ActiveStorage::Current.url_options = Rails.application.routes.default_url_options
   end
 end
 
