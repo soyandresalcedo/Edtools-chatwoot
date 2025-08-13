@@ -29,6 +29,9 @@ master.key
 
 # Ignore env files
 .env
+.env.railway
+.env.development
+.env.example
 
 public/uploads
 public/packs*
