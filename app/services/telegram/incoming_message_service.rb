@@ -198,7 +198,28 @@ class Telegram::IncomingMessageService
   end
 
   def ffmpeg_available?
-    @ffmpeg_available ||= system('which ffmpeg > /dev/null 2>&1')
+    return @ffmpeg_available if defined?(@ffmpeg_available)
+
+    # Test multiple ways to detect ffmpeg
+    which_test = system('which ffmpeg > /dev/null 2>&1')
+    command_test = system('ffmpeg -version > /dev/null 2>&1')
+
+    Rails.logger.info "FFmpeg detection - which: #{which_test}, command: #{command_test}"
+
+    # Try to get more info about the system
+    unless which_test
+      Rails.logger.warn 'FFmpeg not found in PATH'
+      # Check common locations
+      ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/nix/store/*/bin/ffmpeg'].each do |path|
+        next unless File.exist?(path) || Dir.glob(path).any?
+
+        Rails.logger.info "Found FFmpeg at: #{path}"
+        @ffmpeg_available = true
+        return @ffmpeg_available
+      end
+    end
+
+    @ffmpeg_available = which_test && command_test
   end
 
   def convert_oga_to_mp3(oga_file)
@@ -209,23 +230,70 @@ class Telegram::IncomingMessageService
     output_path = File.join(temp_dir, "output_#{SecureRandom.hex(8)}.mp3")
 
     begin
+      Rails.logger.info 'Starting OGA to MP3 conversion...'
+
       # Escribir archivo temporal de entrada
-      File.write(input_path, oga_file.read, mode: 'wb')
+      input_data = oga_file.read
       oga_file.rewind
+      File.write(input_path, input_data, mode: 'wb')
 
-      # Conversión FFmpeg con configuración optimizada
-      ffmpeg_cmd = "ffmpeg -i #{Shellwords.escape(input_path)} -acodec libmp3lame -b:a 128k -y #{Shellwords.escape(output_path)} 2>/dev/null"
-      success = system(ffmpeg_cmd)
+      Rails.logger.info "Input file size: #{input_data.size} bytes, written to: #{input_path}"
 
-      raise 'FFmpeg conversion failed' unless success && File.exist?(output_path)
+      # Detectar el comando ffmpeg correcto
+      ffmpeg_path = detect_ffmpeg_path
+      Rails.logger.info "Using FFmpeg at: #{ffmpeg_path}"
+
+      # Conversión FFmpeg con configuración optimizada y captura de errores
+      ffmpeg_cmd = "#{ffmpeg_path} -i #{Shellwords.escape(input_path)} -acodec libmp3lame -b:a 128k -y #{Shellwords.escape(output_path)}"
+      Rails.logger.info "FFmpeg command: #{ffmpeg_cmd}"
+
+      # Capturar stdout y stderr
+      result = `#{ffmpeg_cmd} 2>&1`
+      success = $?.success?
+
+      Rails.logger.info "FFmpeg result: #{success}, output: #{result.strip}"
+
+      unless success && File.exist?(output_path)
+        Rails.logger.error "FFmpeg conversion failed. Exit code: #{$?.exitstatus}"
+        Rails.logger.error "FFmpeg output: #{result}"
+        raise "FFmpeg conversion failed: #{result}"
+      end
+
+      # Verificar archivo de salida
+      output_size = File.size(output_path)
+      Rails.logger.info "Output file size: #{output_size} bytes"
+
+      raise 'Generated MP3 file is empty' if output_size == 0
 
       # Leer archivo convertido
       mp3_data = File.read(output_path)
+      Rails.logger.info "Successfully converted OGA to MP3, final size: #{mp3_data.size} bytes"
       StringIO.new(mp3_data)
     ensure
       # Limpiar archivos temporales
-      [input_path, output_path].each { |path| File.delete(path) if File.exist?(path) }
+      [input_path, output_path].each do |path|
+        if File.exist?(path)
+          File.delete(path)
+          Rails.logger.debug { "Cleaned up temp file: #{path}" }
+        end
+      end
     end
+  end
+
+  def detect_ffmpeg_path
+    # Try common locations for ffmpeg
+    paths = ['ffmpeg', '/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg']
+
+    # Add nix store paths (for Railway nixpacks)
+    nix_paths = Dir.glob('/nix/store/*/bin/ffmpeg')
+    paths.concat(nix_paths)
+
+    paths.each do |path|
+      return path if system("#{path} -version > /dev/null 2>&1")
+    end
+
+    # Fallback to just 'ffmpeg' and let system handle it
+    'ffmpeg'
   end
 
   def attach_location
