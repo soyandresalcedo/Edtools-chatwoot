@@ -6,7 +6,7 @@ BUNDLE_BUILD__PG = "--with-pg-config=/usr/bin/pg_config"
 BUNDLE_BUILD__SASSC = "--disable-march-tune-native"
 
 [phases.setup]
-nixPkgs = ["ruby_3_4", "nodejs_24", "postgresql", "python3"]
+nixPkgs = ["ruby_3_4", "nodejs_24", "postgresql", "python3", "ffmpeg"]
 nixLibs = ["libvips", "protobuf", "cmake", "libmaxminddb"]
 
 [phases.install]

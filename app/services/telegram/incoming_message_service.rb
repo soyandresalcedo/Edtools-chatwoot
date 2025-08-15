@@ -138,25 +138,81 @@ class Telegram::IncomingMessageService
   def attach_files
     return unless file
 
-    file_download_path = inbox.channel.get_telegram_file_path(file[:file_id])
+    file_id = file.is_a?(Hash) ? file[:file_id] : file['file_id']
+    file_download_path = inbox.channel.get_telegram_file_path(file_id)
     if file_download_path.blank?
-      Rails.logger.info "Telegram file download path is blank for #{file[:file_id]} : inbox_id: #{inbox.id}"
+      Rails.logger.info "Telegram file download path is blank for #{file_id} : inbox_id: #{inbox.id}"
       return
     end
 
-    attachment_file = Down.download(
-      inbox.channel.get_telegram_file_path(file[:file_id])
-    )
+    attachment_file = Down.download(file_download_path)
 
+    if audio_message?
+      attach_audio_file(attachment_file)
+    else
+      attach_regular_file(attachment_file)
+    end
+  end
+
+  def attach_audio_file(oga_file)
+    if ffmpeg_available?
+      mp3_file = convert_oga_to_mp3(oga_file)
+      create_attachment(mp3_file, 'audio/mpeg', 'audio.mp3')
+      Rails.logger.info "Successfully converted OGA to MP3 for message #{@message.id}"
+    else
+      Rails.logger.warn 'FFmpeg not available, using original OGA format'
+      create_attachment(oga_file, oga_file.content_type, oga_file.original_filename)
+    end
+  rescue StandardError => e
+    Rails.logger.error "Audio conversion failed: #{e.message}, using original OGA format"
+    create_attachment(oga_file, oga_file.content_type, oga_file.original_filename)
+  end
+
+  def attach_regular_file(attachment_file)
+    create_attachment(attachment_file, attachment_file.content_type, attachment_file.original_filename)
+  end
+
+  def create_attachment(file_io, content_type, filename)
     @message.attachments.new(
       account_id: @message.account_id,
       file_type: file_content_type,
       file: {
-        io: attachment_file,
-        filename: attachment_file.original_filename,
-        content_type: attachment_file.content_type
+        io: file_io,
+        filename: filename,
+        content_type: content_type
       }
     )
+  end
+
+  def ffmpeg_available?
+    @ffmpeg_available ||= system('which ffmpeg > /dev/null 2>&1')
+  end
+
+  def convert_oga_to_mp3(oga_file)
+    temp_dir = Rails.root.join('tmp/audio_conversion')
+    FileUtils.mkdir_p(temp_dir)
+
+    input_path = File.join(temp_dir, "input_#{SecureRandom.hex(8)}.oga")
+    output_path = File.join(temp_dir, "output_#{SecureRandom.hex(8)}.mp3")
+
+    begin
+      # Escribir archivo temporal de entrada
+      File.write(input_path, oga_file.read, mode: 'wb')
+      oga_file.rewind
+
+      # Conversión FFmpeg con configuración optimizada
+      ffmpeg_cmd = "ffmpeg -i #{Shellwords.escape(input_path)} -acodec libmp3lame -b:a 128k -y #{Shellwords.escape(output_path)} 2>/dev/null"
+      success = system(ffmpeg_cmd)
+
+      raise 'FFmpeg conversion failed' unless success && File.exist?(output_path)
+
+      # Leer archivo convertido
+      mp3_data = File.read(output_path)
+      StringIO.new(mp3_data)
+    ensure
+      # Limpiar archivos temporales
+      [input_path, output_path].each { |path| File.delete(path) if File.exist?(path) }
+    end
   end
 
   def attach_location
