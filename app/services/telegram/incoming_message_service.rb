@@ -155,16 +155,29 @@ class Telegram::IncomingMessageService
   end
 
   def attach_audio_file(oga_file)
-    if ffmpeg_available?
+    Rails.logger.info "Starting audio file processing for message #{@message&.id}"
+    Rails.logger.info "Original filename: #{oga_file.original_filename}"
+    Rails.logger.info "Content type: #{oga_file.content_type}"
+
+    ffmpeg_check = ffmpeg_available?
+    Rails.logger.info "FFmpeg available: #{ffmpeg_check}"
+
+    if ffmpeg_check
+      Rails.logger.info 'Attempting OGA to MP3 conversion...'
       mp3_file = convert_oga_to_mp3(oga_file)
       create_attachment(mp3_file, 'audio/mpeg', 'audio.mp3')
       Rails.logger.info "Successfully converted OGA to MP3 for message #{@message.id}"
     else
       Rails.logger.warn 'FFmpeg not available, using original OGA format'
+      # Check what's actually available
+      system_info = `which ffmpeg 2>/dev/null || echo "ffmpeg not found"`
+      Rails.logger.warn "System check: #{system_info.strip}"
       create_attachment(oga_file, oga_file.content_type, oga_file.original_filename)
     end
   rescue StandardError => e
-    Rails.logger.error "Audio conversion failed: #{e.message}, using original OGA format"
+    Rails.logger.error "Audio conversion failed: #{e.message}"
+    Rails.logger.error "Backtrace: #{e.backtrace.first(3).join(', ')}"
+    Rails.logger.error 'Using original OGA format as fallback'
     create_attachment(oga_file, oga_file.content_type, oga_file.original_filename)
   end
 
