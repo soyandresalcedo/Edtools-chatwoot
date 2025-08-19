@@ -68,9 +68,9 @@ export default {
     ...mapGetters({ globalConfig: 'globalConfig/get' }),
     termsLink() {
       return this.$t('REGISTER.TERMS_ACCEPT')
-        .replace('https://www.chatwoot.com/terms', this.globalConfig.termsURL)
+        .replace('https://www.edtools.co/terms', this.globalConfig.termsURL)
         .replace(
-          'https://www.chatwoot.com/privacy-policy',
+          'https://www.edtools.co/politica-de-privacidad',
           this.globalConfig.privacyURL
         );
     },

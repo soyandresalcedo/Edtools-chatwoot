@@ -4,13 +4,13 @@
     "TITLE": "Register",
     "TESTIMONIAL_HEADER": "All it takes is one step to move forward",
     "TESTIMONIAL_CONTENT": "You're one step away from engaging your customers, retaining them and finding new ones.",
-    "TERMS_ACCEPT": "By creating an account, you agree to our <a href=\"https://www.chatwoot.com/terms\">T & C</a> and <a href=\"https://www.chatwoot.com/privacy-policy\">Privacy policy</a>",
+    "TERMS_ACCEPT": "By creating an account, you agree to our <a href=\"https://www.edtools.co/terms\" target=\"_blank\">Terms & Conditions</a> and <a href=\"https://edtools.co/politica-de-privacidad\" target=\"_blank\">Privacy Policy</a>."
     "OAUTH": {
       "GOOGLE_SIGNUP": "Sign up with Google"
     },
     "COMPANY_NAME": {
       "LABEL": "Company name",
-      "PLACEHOLDER": "Enter your company name. E.g., Wayne Enterprises",
+      "PLACEHOLDER": "Enter your company name. E.g., Universidad Edtools",
       "ERROR": "Company name is too short."
     },
     "FULL_NAME": {
@@ -20,7 +20,7 @@
     },
     "EMAIL": {
       "LABEL": "Work email",
-      "PLACEHOLDER": "Enter your work email address. E.g., bruce{'@'}wayne{'.'}enterprises",
+      "PLACEHOLDER": "Enter your work email address. E.g., bruce{'@'}universidad{'.'}edtools",
       "ERROR": "Please enter a valid work email address."
     },
     "PASSWORD": {
