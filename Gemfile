@@ -37,6 +37,7 @@ gem 'json_schemer'
 gem 'json_refs'
 # Rack middleware for blocking & throttling abusive requests
 gem 'rack-attack', '>= 6.7.0'
+gem 'rack-timeout'
 # a utility tool for streaming, flexible and safe downloading of remote files
 gem 'down'
 # authentication type to fetch and send mail over oauth2.0
@@ -185,7 +186,6 @@ gem 'shopify_api'
 
 group :production do
   # we dont want request timing out in development while using byebug
-  gem 'rack-timeout'
   # for heroku autoscaling
   gem 'judoscale-rails', require: false
   gem 'judoscale-sidekiq', require: false
