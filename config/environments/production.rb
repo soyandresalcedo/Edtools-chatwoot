@@ -103,7 +103,8 @@ Rails.application.configure do
   config.action_mailbox.ingress = ENV.fetch('RAILS_INBOUND_EMAIL_SERVICE', 'relay').to_sym
 
   if ENV['FRONTEND_URL'].present?
-    config.action_mailer.default_url_options = { host: ENV['FRONTEND_URL'], protocol: 'https' }
-    routes.default_url_options[:host] = ENV['FRONTEND_URL']
+    host = ENV['FRONTEND_URL'].gsub(/https?:\/\//, '')
+    config.action_mailer.default_url_options = { host: host, protocol: 'https' }
+    routes.default_url_options[:host] = host
   end
 end

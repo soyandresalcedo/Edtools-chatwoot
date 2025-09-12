@@ -73,5 +73,8 @@ class AccountBuilder
     @user.type = 'SuperAdmin' if @super_admin
     @user.confirm if @confirmed
     @user.save!
+
+    # Send confirmation instructions for new users who need confirmation
+    @user.send_confirmation_instructions unless @user.confirmed?
   end
 end
